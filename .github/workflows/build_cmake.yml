@@ -2,19 +2,14 @@ name: gcc x86_64 tunck
 
 on: [workflow_dispatch]
 
+env:
+  name: "x86_64 trunk win32 seh ucrt"
+  artifact: "x86_64-trunk-release-win32-seh-ucrt-rt_trunk-revtrunk.7z"
+
 jobs:
   build:
-    name: ${{ matrix.config.name }}
+    name: ${{ env.name }}
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-        - {
-            name: "x86_64 trunk posix seh ucrt",
-            artifact: "x86_64-trunk-release-posix-seh-ucrt-rt_v13-revtrunk.7z",
-            build_cmd: "--mode=gcc-trunk --buildroot=/c/buildroot --jobs=4 --rev=trunk --rt-version=v13 --threads=posix --exceptions=seh --arch=x86_64 --bin-compress --enable-languages=c,c++,fortran --with-default-msvcrt=ucrt --logviewer-command=cat"
-          }
 
     steps:
     - uses: actions/checkout@v3
@@ -25,13 +20,13 @@ jobs:
 
     - name: Build
       shell: msys2 {0}
-      run: ./build ${{ matrix.config.build_cmd }}
+      run: ./build --mode=gcc-trunk --buildroot=/c/buildroot --jobs=4 --rev=trunk --rt-version=trunk --threads=win32 --exceptions=seh --arch=x86_64 --bin-compress --enable-languages=c,c++,fortran --with-default-msvcrt=ucrt --logviewer-command=cat
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        path: c:/buildroot/archives/${{ matrix.config.artifact }}
-        name: ${{ matrix.config.artifact }}
+        path: c:/buildroot/archives/${{ env.artifact }}
+        name: ${{ env.artifact }}
 
   release:
     if: contains(github.ref, 'tags/v')
@@ -61,16 +56,8 @@ jobs:
 
   publish:
     if: contains(github.ref, 'tags/v')
-    name: ${{ matrix.config.name }}
+    name: ${{ env.name }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-        - {
-            name: "x86_64 trunk posix seh ucrt",
-            artifact: "x86_64-trunk-release-posix-seh-ucrt-rt_v13-revtrunk.7z"
-          }
 
     needs: release
 
@@ -78,7 +65,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{ matrix.config.artifact }}
+        name: ${{ env.artifact }}
         path: ./
 
     - name: Download URL
@@ -98,6 +85,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
-        asset_path: ./${{ matrix.config.artifact }}
-        asset_name: ${{ matrix.config.artifact }}
+        asset_path: ./${{ env.artifact }}
+        asset_name: ${{ env.artifact }}
         asset_content_type: application/x-gtar

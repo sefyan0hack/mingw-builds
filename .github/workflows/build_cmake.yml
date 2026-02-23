@@ -2,10 +2,6 @@ name: gcc x86_64 trunk
 
 on: [workflow_dispatch]
 
-env:
-  name: "x86_64 trunk win32 seh ucrt"
-  artifact: "x86_64-trunk-release-win32-seh-ucrt-rt_v13-revtrunk.7z"
-
 jobs:
   build:
     runs-on: windows-latest

@@ -37,8 +37,7 @@ jobs:
             --enable-languages=c,c++ --with-default-msvcrt=ucrt --logviewer-command=cat
 
       - name: Upload artifact
-        shell: msys2 {0}
         uses: actions/upload-artifact@v4
         with:
-          path: /c/buildroot/archives/*
+          path: C:\buildroot\archives\*
           name: gcc-trunk
